@@ -47,7 +47,13 @@ lamian_test <- function(expr, cellanno, pseudotime, design=NULL, testvar=2, perm
     if (length(gid) > 0) { ## if yes, for those genes, add a white-noise with sd=1e-5 on the sample with sd=0.
       mask <- sdm[gid,rep(seq_len(ncol(sdm)),as.vector(table(cellanno[,2])[colnames(sdm)])),drop=F]
       colnames(mask) <- unlist(sapply(colnames(sdm),function(i) cellanno[cellanno[,2]==i,1]))
-      expr[gid,] <- expr[gid,] + mask[,colnames(expr),drop=F] * matrix(rnorm(length(mask),sd=sd.adjust), nrow=length(gid)) ## before 20211126, sd.adjust = 1e-5 
+      all_gid <- rownames(expr)
+      gid_diff <- setdiff(all_gid, gid)
+      tmp_res <- expr[gid,] + mask[,colnames(expr),drop=F] * matrix(rnorm(length(mask),sd=sd.adjust), nrow=length(gid)) ## before 20211126, sd.adjust = 1e-5 
+      tmp_expr <- rbind(tmp_res, expr[gid_diff,])
+      expr <- tmp_expr[all_gid,]
+      
+      # expr[gid,] <- expr[gid,] + mask[,colnames(expr),drop=F] * matrix(rnorm(length(mask),sd=sd.adjust), nrow=length(gid)) ## before 20211126, sd.adjust = 1e-5 
       rm('mask')  
     } 
   }
